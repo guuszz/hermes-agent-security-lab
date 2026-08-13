@@ -18,4 +18,11 @@ export default tseslint.config(
       "@typescript-eslint/no-floating-promises": "error",
     },
   },
+  {
+    files: ["test/**/*.ts"],
+    rules: {
+      "@typescript-eslint/require-await": "off",
+      "@typescript-eslint/no-unnecessary-type-assertion": "off",
+    },
+  },
 );

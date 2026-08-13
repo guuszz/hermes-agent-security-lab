@@ -32,6 +32,17 @@ M0 implements only repository tooling and workspace initialization. The initiali
 `scenarios`, `fixtures`, and `.hermes-lab/runs`, then writes an immutable configuration manifest.
 Existing configuration is never silently overwritten.
 
+## M1 provider boundary
+
+`OrcaRouterProvider` implements the provider port without importing CLI or policy modules. Its
+configuration fixes the destination to `https://api.orcarouter.ai/v1` and the model to
+`tencent/hy3`, preventing fallback or credential forwarding to another host. A `BudgetLedger`
+atomically reserves worst-case request cost before transport and commits reported usage only after
+a valid response.
+
+The adapter accepts injected `fetch`, sleep, and clock functions. Tests therefore cover transport,
+retry, telemetry, redaction, and budget behavior without network access or provider credentials.
+
 ## Dependency direction
 
 ```text

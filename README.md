@@ -6,8 +6,8 @@
 A local, reproducible laboratory for evaluating tool-using AI agents with declarative
 scenarios, deny-by-default policies, traceable evidence, and deterministic outcomes.
 
-> Status: M0 foundation. The local workspace initialization flow is implemented. Provider,
-> scenario execution, policy evaluation, and reporting arrive in the next milestones.
+> Status: M1 provider integration. The OrcaRouter/Hy3 adapter is implemented and verified with
+> mocked transport. The real smoke test remains opt-in and budget-capped.
 
 ## Why this exists
 
@@ -61,6 +61,49 @@ npm audit --audit-level=high
 
 CI uses only local fixtures and mocks. It does not receive an API key and cannot spend API credit.
 
+## OrcaRouter provider
+
+M1 adds a dedicated OpenAI-compatible adapter with a fixed endpoint and `tencent/hy3` model. It
+returns content, resolved model, token usage, latency, estimated cost, and request ID when present.
+
+```ts
+import {
+  BudgetLedger,
+  OrcaRouterProvider,
+  loadOrcaRouterConfig,
+} from "hermes-agent-security-lab";
+
+const provider = new OrcaRouterProvider(
+  loadOrcaRouterConfig(),
+  new BudgetLedger(0.01),
+);
+
+const result = await provider.generate(
+  [{ role: "user", content: "Return a short JSON object." }],
+  { estimatedInputTokens: 32 },
+);
+```
+
+The provider reserves the maximum estimated cost before network use, prevents concurrent budget
+oversubscription, respects `Retry-After`, applies bounded retries, and redacts secret-shaped error
+text. Successful responses without token usage are rejected rather than recorded as free.
+Pricing constants are a 2026-08-13 snapshot of the
+[Hy3 model page](https://www.orcarouter.ai/models/tencent/hy3) and must be reviewed when rates change.
+
+### Controlled real smoke test
+
+The smoke command defaults to `SKIPPED`. One request is permitted only when both a key and the exact
+spend confirmation are present:
+
+```bash
+ORCAROUTER_API_KEY=... \
+HERMES_PAID_SMOKE_CONFIRM=YES_SPEND_UP_TO_0.001_USD \
+npm run smoke:orcarouter
+```
+
+It fixes output to 32 tokens, disables retries, and enforces a total budget of US$0.001. Keep the
+key in a host-provided environment secret rather than a committed file.
+
 ## Security model
 
 - local and synthetic fixtures by default;
@@ -75,7 +118,7 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 ## Roadmap
 
 - **M0:** repository foundation, CLI bootstrap, tests, CI, ADR, and architecture.
-- **M1:** dedicated OrcaRouter provider, budget controls, mock tests, and one controlled smoke test.
+- **M1:** dedicated OrcaRouter provider, budget controls, mock tests, and controlled smoke harness.
 - **M2:** YAML scenario schema, loader, validator, and runner.
 - **M3:** deny-by-default policy engine and blocking tests.
 - **M4:** evidence store, deterministic evaluator, JSON and Markdown reports.
@@ -88,12 +131,15 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 - [Scenario authoring contract](docs/scenario-authoring.md)
 - [M0 audit](docs/audits/m0-reuse-audit.md)
 - [ADR-0001](docs/adr/0001-foundation-and-trust-boundaries.md)
+- [ADR-0002](docs/adr/0002-orcarouter-provider-and-budget.md)
+- [M1 validation](docs/validation/m1-validation.md)
 - [Contributing](CONTRIBUTING.md)
 
 ## Limitations
 
-M0 does not call a model, execute scenarios, or produce security findings. It only establishes a
-tested, isolated foundation and a local initialization flow. No external target is contacted.
+M1 can call only the configured Hy3 provider when explicitly invoked; the default tests and CI use
+mocks. Scenario execution, tool dispatch, durable budgets, and security findings are not yet
+implemented. No external target is contacted by the included flows.
 
 ## License
 
