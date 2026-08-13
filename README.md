@@ -6,8 +6,8 @@
 A local, reproducible laboratory for evaluating tool-using AI agents with declarative
 scenarios, deny-by-default policies, traceable evidence, and deterministic outcomes.
 
-> Status: M1 provider integration. The OrcaRouter/Hy3 adapter is implemented and verified with
-> mocked transport. The real smoke test remains opt-in and budget-capped.
+> Status: M2 scenario engine. Strict YAML validation, fixture integrity checks, and zero-execution
+> run preparation are implemented. The real provider smoke test remains opt-in and budget-capped.
 
 ## Why this exists
 
@@ -15,15 +15,14 @@ AI agents can read files, call tools, retain context, and cross trust boundaries
 Security Lab makes these behaviors testable through synthetic fixtures and explicit policies.
 The model may explain an outcome, but deterministic evaluators decide whether a scenario passed.
 
-## M0 architecture
+## Implemented local flow
 
 ```mermaid
 flowchart LR
-    CLI["hermes-lab init"] --> INIT["Workspace initializer"]
-    INIT --> MANIFEST["Deny-by-default manifest"]
-    MANIFEST --> SCENARIOS["scenarios/"]
-    MANIFEST --> FIXTURES["fixtures/"]
-    MANIFEST --> RUNS[".hermes-lab/runs/"]
+    YAML["Scenario YAML"] --> VALIDATE["Strict JSON Schema + semantic checks"]
+    VALIDATE --> HASH["Fixture path and SHA-256 verification"]
+    HASH --> PREPARE["Zero-execution run preparation"]
+    PREPARE --> MANIFEST["Traceable run manifest"]
 ```
 
 The target architecture is documented in [docs/architecture.md](docs/architecture.md).
@@ -35,18 +34,26 @@ Requirements: Node.js 20 or newer.
 ```bash
 npm ci
 npm run build
-node dist/cli/index.js init ./demo-lab --name demo-lab
+node dist/cli/index.js init . --name hermes-agent-security-lab
+node dist/cli/index.js validate scenarios/tool-misuse.yaml
+node dist/cli/index.js run scenarios/tool-misuse.yaml --workspace .
 ```
 
 Expected output:
 
 ```text
-Initialized deny-by-default workspace at .../demo-lab
-Manifest: .../demo-lab/.hermes-lab/workspace.json
+Valid scenario tool-misuse
+SHA-256: ...
+Prepared local run ...-tool-misuse-...
+Model calls: 0; tool calls: 0
 ```
 
-The generated manifest starts with `defaultDeny: true`. Repeating the same command is idempotent;
-trying to reuse the directory with different settings is rejected.
+The generated workspace starts with `defaultDeny: true`. `validate` rejects unknown fields and
+policy contradictions. `run` verifies local fixture boundaries and hashes, then writes a prepared
+manifest under `.hermes-lab/runs/`; it does not invoke a model or tool in M2.
+
+Three versioned examples cover indirect instruction, tool misuse, and path traversal. See the
+[scenario authoring contract](docs/scenario-authoring.md) for the complete field reference.
 
 ## Quality checks
 
@@ -119,7 +126,7 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 
 - **M0:** repository foundation, CLI bootstrap, tests, CI, ADR, and architecture.
 - **M1:** dedicated OrcaRouter provider, budget controls, mock tests, and controlled smoke harness.
-- **M2:** YAML scenario schema, loader, validator, and runner.
+- **M2:** YAML scenario schema, loader, validator, and zero-execution runner. **Complete.**
 - **M3:** deny-by-default policy engine and blocking tests.
 - **M4:** evidence store, deterministic evaluator, JSON and Markdown reports.
 - **M5:** demo assets, release candidate, and public launch material.
@@ -132,14 +139,16 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 - [M0 audit](docs/audits/m0-reuse-audit.md)
 - [ADR-0001](docs/adr/0001-foundation-and-trust-boundaries.md)
 - [ADR-0002](docs/adr/0002-orcarouter-provider-and-budget.md)
+- [ADR-0003](docs/adr/0003-scenario-validation-and-prepared-runs.md)
 - [M1 validation](docs/validation/m1-validation.md)
+- [M2 validation](docs/validation/m2-validation.md)
 - [Contributing](CONTRIBUTING.md)
 
 ## Limitations
 
-M1 can call only the configured Hy3 provider when explicitly invoked; the default tests and CI use
-mocks. Scenario execution, tool dispatch, durable budgets, and security findings are not yet
-implemented. No external target is contacted by the included flows.
+The M2 runner prepares a run but does not dispatch tools or evaluate expectations. Policy
+enforcement arrives in M3; durable evidence, findings, and reports arrive in M4. Provider state is
+per process. No external target is contacted by the included local flows.
 
 ## License
 

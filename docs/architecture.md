@@ -26,7 +26,7 @@ flowchart LR
     EVALUATOR --> REPORTS["JSON and Markdown"]
 ```
 
-## M0 implemented boundary
+## Workspace boundary
 
 M0 implements only repository tooling and workspace initialization. The initializer creates
 `scenarios`, `fixtures`, and `.hermes-lab/runs`, then writes an immutable configuration manifest.
@@ -43,6 +43,18 @@ a valid response.
 The adapter accepts injected `fetch`, sleep, and clock functions. Tests therefore cover transport,
 retry, telemetry, redaction, and budget behavior without network access or provider credentials.
 
+## M2 scenario boundary
+
+The loader parses YAML as untrusted input, applies a strict JSON Schema with unknown fields
+disabled, and then checks cross-field invariants such as unique identifiers and disjoint tool
+allow/deny lists. It returns the canonical source path and a SHA-256 digest of the source bytes.
+
+The runner accepts only an initialized deny-by-default workspace. Before creating a run, it resolves
+each fixture lexically and through the filesystem, checks that it remains inside the fixture
+directory, and verifies its declared SHA-256. A successful M2 run records a `state: prepared`
+manifest with policy, budgets, expectations, and zero model/tool calls. Tool dispatch is deferred
+to M3.
+
 ## Dependency direction
 
 ```text
@@ -57,5 +69,5 @@ Core domain modules must not depend on CLI rendering or a concrete provider.
 ## Runtime data
 
 Runtime artifacts live under `.hermes-lab/` and are ignored by Git. Versioned scenarios and
-synthetic fixtures remain outside that directory. Future evidence manifests will hash fixture
-inputs and redact secret-shaped values before persistence.
+synthetic fixtures remain outside that directory. M2 manifests hash scenario and fixture inputs.
+M4 will add redacted events, decisions, evaluator output, and reports.

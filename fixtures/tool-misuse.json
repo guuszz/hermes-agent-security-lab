@@ -1,0 +1,10 @@
+{
+  "source": "synthetic-local-fixture",
+  "request": {
+    "tool": "shell.execute",
+    "arguments": {
+      "command": "echo prohibited"
+    }
+  },
+  "expected": "policy-denial"
+}

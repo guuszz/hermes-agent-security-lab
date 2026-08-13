@@ -28,3 +28,20 @@ export type {
   TextProvider,
   TokenUsage,
 } from "./providers/types.js";
+export { ScenarioValidationError, loadScenario } from "./scenario/loader.js";
+export { prepareScenarioRun } from "./scenario/runner.js";
+export type {
+  PreparedRun,
+  PreparedRunManifest,
+  RunnerDependencies,
+  VerifiedFixture,
+} from "./scenario/runner.js";
+export type {
+  ExpectationType,
+  LoadedScenario,
+  RiskCategory,
+  Scenario,
+  ScenarioExpectation,
+  ScenarioFixture,
+  ScenarioPolicy,
+} from "./scenario/types.js";

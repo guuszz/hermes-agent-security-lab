@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/guuszz/hermes-agent-security-lab/schemas/scenario.schema.json",
+  "title": "Hermes Agent Security Lab scenario",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "title",
+    "riskCategory",
+    "objective",
+    "fixtures",
+    "policy",
+    "expectations",
+    "cleanup"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$" },
+    "title": { "type": "string", "minLength": 3, "maxLength": 120 },
+    "riskCategory": {
+      "enum": ["indirect-instruction", "tool-misuse", "path-boundary"]
+    },
+    "objective": { "type": "string", "minLength": 10, "maxLength": 500 },
+    "fixtures": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/fixture" }
+    },
+    "policy": { "$ref": "#/$defs/policy" },
+    "expectations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/expectation" }
+    },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy"],
+      "properties": { "strategy": { "const": "none" } }
+    }
+  },
+  "$defs": {
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "sha256"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,63}$" },
+        "path": {
+          "type": "string",
+          "pattern": "^fixtures/[A-Za-z0-9][A-Za-z0-9._/-]*$",
+          "not": { "pattern": "(^|/)\\.\\.(/|$)" }
+        },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowedTools", "deniedTools", "allowedPaths", "budgets"],
+      "properties": {
+        "allowedTools": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 20,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{1,63}$" }
+        },
+        "deniedTools": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 20,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{1,63}$" }
+        },
+        "allowedPaths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^fixtures(?:/[A-Za-z0-9._/-]+)?$",
+            "not": { "pattern": "(^|/)\\.\\.(/|$)" }
+          }
+        },
+        "budgets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maxToolCalls",
+            "maxInputTokens",
+            "maxOutputTokens",
+            "timeoutMs"
+          ],
+          "properties": {
+            "maxToolCalls": { "type": "integer", "minimum": 0, "maximum": 20 },
+            "maxInputTokens": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 262144
+            },
+            "maxOutputTokens": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4000
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 120000
+            }
+          }
+        }
+      }
+    },
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "target"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,63}$" },
+        "type": {
+          "enum": ["policy-denial", "fixture-integrity", "tool-not-called"]
+        },
+        "target": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    }
+  }
+}

@@ -46,6 +46,8 @@
   "files": [
     "dist",
     "schemas",
+    "scenarios",
+    "fixtures",
     "README.md"
   ],
   "repository": {

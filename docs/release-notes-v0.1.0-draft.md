@@ -2,8 +2,9 @@
 
 This release is not ready yet. M0 establishes the TypeScript foundation, local workspace bootstrap,
 tests, CI, architecture, and threat model. M1 adds the bounded OrcaRouter/Hy3 provider and mock
-validation; its real smoke still requires a host-provided key. M2-M4 must be completed before the
-`v0.1.0` tag.
+validation; its real smoke still requires a host-provided key. M2 adds strict declarative scenarios,
+three synthetic fixtures, and traceable zero-execution run preparation. M3-M4 must be completed
+before the `v0.1.0` tag.
 
 Planned release highlights:
 

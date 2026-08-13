@@ -18,3 +18,8 @@ Versioning.
 - Atomic per-process budget reservations and Hy3 pricing calculator.
 - Bounded retries with `Retry-After`, timeout propagation, and error redaction.
 - Opt-in real smoke harness capped at US$0.001 with one attempt and 32 output tokens.
+- Strict JSON Schema and semantic validation for declarative YAML scenarios.
+- Three synthetic scenarios for indirect instruction, tool misuse, and path boundary behavior.
+- Fixture real-path boundaries and SHA-256 integrity verification.
+- `hermes-lab validate` and zero-execution `hermes-lab run` commands.
+- Prepared run manifests with source hashes, policy, budgets, expectations, and call counts.

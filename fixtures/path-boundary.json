@@ -1,0 +1,10 @@
+{
+  "source": "synthetic-local-fixture",
+  "request": {
+    "tool": "fixture.read",
+    "arguments": {
+      "path": "../outside/secret.txt"
+    }
+  },
+  "expected": "policy-denial"
+}
