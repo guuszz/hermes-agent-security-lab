@@ -17,7 +17,6 @@ import type { LoadedScenario, ScenarioExpectation } from "./types.js";
 export interface VerifiedFixture {
   readonly id: string;
   readonly relativePath: string;
-  readonly absolutePath: string;
   readonly expectedSha256: string;
   readonly observedSha256: string;
   readonly integrity: "verified";
@@ -31,7 +30,7 @@ export interface PreparedRunManifest {
   readonly createdAt: string;
   readonly scenario: {
     readonly id: string;
-    readonly sourcePath: string;
+    readonly sourceFile: string;
     readonly sourceSha256: string;
     readonly riskCategory: string;
   };
@@ -132,7 +131,6 @@ async function verifyFixtures(
     verified.push({
       id: fixture.id,
       relativePath: fixture.path,
-      absolutePath,
       expectedSha256: fixture.sha256,
       observedSha256,
       integrity: "verified",
@@ -188,7 +186,7 @@ async function prepareLoadedScenarioRun(
     createdAt: createdAt.toISOString(),
     scenario: {
       id: loaded.scenario.id,
-      sourcePath: loaded.sourcePath,
+      sourceFile: path.basename(loaded.sourcePath),
       sourceSha256: loaded.sourceSha256,
       riskCategory: loaded.scenario.riskCategory,
     },

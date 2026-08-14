@@ -5,7 +5,8 @@ tests, CI, architecture, and threat model. M1 adds the bounded OrcaRouter/Hy3 pr
 validation; its real smoke still requires a host-provided key. M2 adds strict declarative scenarios,
 three synthetic fixtures, and traceable zero-execution run preparation. M3 adds deny-by-default
 policy decisions, approval gates, path and budget enforcement, plus a schema-validated local
-fixture tool. M4 remains before the `v0.1.0` tag.
+fixture tool. M4 adds hashed evidence, deterministic expectation evaluation, reproducible reports,
+and cleanup. M5 release/demo work remains before the `v0.1.0` tag.
 
 Planned release highlights:
 

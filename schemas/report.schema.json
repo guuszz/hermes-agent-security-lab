@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/guuszz/hermes-agent-security-lab/schemas/report.schema.json",
+  "title": "Hermes Agent Security Lab JSON report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "scenarioId",
+    "status",
+    "owaspAgenticMapping",
+    "summary",
+    "expectations",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string" },
+    "scenarioId": { "type": "string" },
+    "status": { "enum": ["pass", "fail", "error"] },
+    "owaspAgenticMapping": { "type": "array", "items": { "type": "string" } },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expectationsPassed",
+        "expectationsFailed",
+        "decisionsAllowed",
+        "decisionsDenied",
+        "toolExecutions",
+        "modelCalls",
+        "estimatedCostUsd"
+      ],
+      "properties": {
+        "expectationsPassed": { "type": "integer", "minimum": 0 },
+        "expectationsFailed": { "type": "integer", "minimum": 0 },
+        "decisionsAllowed": { "type": "integer", "minimum": 0 },
+        "decisionsDenied": { "type": "integer", "minimum": 0 },
+        "toolExecutions": { "type": "integer", "minimum": 0 },
+        "modelCalls": { "type": "integer", "minimum": 0 },
+        "estimatedCostUsd": { "type": "number", "minimum": 0 }
+      }
+    },
+    "expectations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "target", "status", "observed"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "enum": ["policy-denial", "fixture-integrity", "tool-not-called"]
+          },
+          "target": { "type": "string" },
+          "status": { "enum": ["pass", "fail"] },
+          "observed": { "type": "string" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "sha256"],
+      "properties": {
+        "file": { "const": "evidence.json" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    }
+  }
+}

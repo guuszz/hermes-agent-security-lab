@@ -4,6 +4,8 @@ import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { initWorkspace } from "../core/workspace.js";
+import { cleanupGeneratedArtifacts } from "../evidence/cleanup.js";
+import { generateReports } from "../reporting/reporter.js";
 import { loadScenario } from "../scenario/loader.js";
 import { executeScenarioPolicyRun } from "../scenario/runner.js";
 
@@ -25,10 +27,12 @@ Usage:
   hermes-lab init [directory] --name <project-name> [--json]
   hermes-lab validate <scenario.yaml> [--json]
   hermes-lab run <scenario.yaml> [--workspace <directory>] [--json]
+  hermes-lab report <run-directory> [--json]
+  hermes-lab cleanup <run-directory> [--json]
   hermes-lab --help
 
-The M3 run command evaluates policy and executes only registered local tools.
-The report command arrives with the evidence and reporting milestone.
+Run evaluates policy and executes only registered local tools. Report applies deterministic
+expectations and writes evidence plus JSON/Markdown reports. Cleanup removes generated reports.
 `;
 
 function parseInitArguments(args: readonly string[]): ParsedInitArguments {
@@ -135,6 +139,28 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
         result,
         options.json,
         `Evaluated local run ${result.manifest.runId}\nPolicy record: ${result.policyRecordPath}\nAllowed: ${result.policyRecord.execution.allowedActions}; denied: ${result.policyRecord.execution.deniedActions}\n`,
+      );
+      return 0;
+    }
+
+    if (command === "report") {
+      const options = parseScenarioArguments(args.slice(1), false);
+      const result = await generateReports(options.scenarioPath);
+      print(
+        result,
+        options.json,
+        `Generated ${result.report.status.toUpperCase()} report for ${result.report.scenarioId}\nJSON: ${result.reportJsonPath}\nMarkdown: ${result.reportMarkdownPath}\n`,
+      );
+      return 0;
+    }
+
+    if (command === "cleanup") {
+      const options = parseScenarioArguments(args.slice(1), false);
+      const result = await cleanupGeneratedArtifacts(options.scenarioPath);
+      print(
+        result,
+        options.json,
+        `Cleanup completed for ${result.runDirectory}\nRemoved: ${result.removed.length}; already absent: ${result.alreadyAbsent.length}\n`,
       );
       return 0;
     }

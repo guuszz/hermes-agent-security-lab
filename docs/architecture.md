@@ -70,6 +70,22 @@ The runner persists `policy-decisions.json` beside the M2 preparation manifest. 
 contains ordered decisions, usage snapshots, structured tool results, and literal zero model-call
 counts. M4 will promote these records into the durable evidence model and evaluate expectations.
 
+## M4 evidence and reporting boundary
+
+The evidence store accepts only a resolved directory beneath `.hermes-lab/runs`, reopens both M2
+and M3 artifacts, hashes their literal bytes, and verifies that run IDs and scenario source hashes
+match. Runtime manifests store relative fixture paths and a scenario filename rather than absolute
+workstation paths. Evidence applies secret redaction before
+schema validation and exclusive creation.
+
+The evaluator implements each expectation type directly: fixture hash presence, matching policy
+denial, and absence of a tool execution. Any tool failure makes the run an error; otherwise unmet
+expectations fail the run. Models have no role in this decision.
+
+Reporting validates and writes JSON plus human-readable Markdown, with checksum sidecars for both
+evidence and JSON report. The report command is reproducible for an unchanged evidence file. Cleanup
+removes only the five generated evidence/report files and leaves source manifests intact.
+
 ## Dependency direction
 
 ```text
@@ -85,4 +101,5 @@ Core domain modules must not depend on CLI rendering or a concrete provider.
 
 Runtime artifacts live under `.hermes-lab/` and are ignored by Git. Versioned scenarios and
 synthetic fixtures remain outside that directory. M2 manifests hash scenario and fixture inputs;
-M3 adds policy decisions and bounded local tool results. M4 will add evaluator output and reports.
+M3 adds policy decisions and bounded local tool results. M4 adds schema-validated evaluation,
+checksums, and reports. M5 will add release/demo artifacts.

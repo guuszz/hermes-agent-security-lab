@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/guuszz/hermes-agent-security-lab/schemas/evidence.schema.json",
+  "title": "Hermes Agent Security Lab evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "createdAt",
+    "state",
+    "scenario",
+    "artifacts",
+    "fixtures",
+    "decisions",
+    "toolExecutions",
+    "usage",
+    "evaluation"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string", "minLength": 10 },
+    "createdAt": { "type": "string", "minLength": 20 },
+    "state": { "const": "evaluated" },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceSha256", "riskCategory", "owaspAgenticMapping"],
+      "properties": {
+        "id": { "type": "string" },
+        "sourceSha256": { "$ref": "#/$defs/sha256" },
+        "riskCategory": { "type": "string" },
+        "owaspAgenticMapping": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/artifact" }
+    },
+    "fixtures": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/fixture" }
+    },
+    "decisions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/decision" }
+    },
+    "toolExecutions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/toolExecution" }
+    },
+    "usage": { "$ref": "#/$defs/totalUsage" },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "passed", "failed", "errors", "expectations"],
+      "properties": {
+        "status": { "enum": ["pass", "fail", "error"] },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "errors": { "type": "array", "items": { "type": "string" } },
+        "expectations": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/expectation" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "file", "sha256", "bytes"],
+      "properties": {
+        "role": { "enum": ["run-manifest", "policy-decisions"] },
+        "file": { "enum": ["manifest.json", "policy-decisions.json"] },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "bytes": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "sha256", "bytes", "integrity"],
+      "properties": {
+        "id": { "type": "string" },
+        "path": { "type": "string", "pattern": "^fixtures/" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "integrity": { "const": "verified" }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["toolCalls", "inputTokens", "outputTokens", "elapsedMs"],
+      "properties": {
+        "toolCalls": { "type": "integer", "minimum": 0 },
+        "inputTokens": { "type": "integer", "minimum": 0 },
+        "outputTokens": { "type": "integer", "minimum": 0 },
+        "elapsedMs": { "type": "number", "minimum": 0 }
+      }
+    },
+    "totalUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "toolCalls",
+        "inputTokens",
+        "outputTokens",
+        "elapsedMs",
+        "modelCalls",
+        "providerInputTokens",
+        "providerOutputTokens",
+        "estimatedCostUsd"
+      ],
+      "properties": {
+        "toolCalls": { "type": "integer", "minimum": 0 },
+        "inputTokens": { "type": "integer", "minimum": 0 },
+        "outputTokens": { "type": "integer", "minimum": 0 },
+        "elapsedMs": { "type": "number", "minimum": 0 },
+        "modelCalls": { "type": "integer", "minimum": 0 },
+        "providerInputTokens": { "type": "integer", "minimum": 0 },
+        "providerOutputTokens": { "type": "integer", "minimum": 0 },
+        "estimatedCostUsd": { "type": "number", "minimum": 0 }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "actionId",
+        "tool",
+        "effect",
+        "code",
+        "reason",
+        "usageBefore",
+        "usageAfter"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1 },
+        "actionId": { "type": "string" },
+        "tool": { "type": "string" },
+        "effect": { "enum": ["allow", "deny"] },
+        "code": { "type": "string" },
+        "reason": { "type": "string" },
+        "requestedPath": { "type": "string" },
+        "usageBefore": { "$ref": "#/$defs/usage" },
+        "usageAfter": { "$ref": "#/$defs/usage" }
+      }
+    },
+    "toolExecution": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actionId", "tool", "status", "durationMs", "result"],
+          "properties": {
+            "actionId": { "type": "string" },
+            "tool": { "const": "fixture.read" },
+            "status": { "const": "succeeded" },
+            "durationMs": { "type": "number", "minimum": 0 },
+            "result": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "path", "bytes", "sha256"],
+              "properties": {
+                "kind": { "const": "fixture-metadata" },
+                "path": { "type": "string" },
+                "bytes": { "type": "integer", "minimum": 0 },
+                "sha256": { "$ref": "#/$defs/sha256" }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actionId", "tool", "status", "durationMs", "error"],
+          "properties": {
+            "actionId": { "type": "string" },
+            "tool": { "type": "string" },
+            "status": { "const": "failed" },
+            "durationMs": { "type": "number", "minimum": 0 },
+            "error": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "target", "status", "observed"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "enum": ["policy-denial", "fixture-integrity", "tool-not-called"]
+        },
+        "target": { "type": "string" },
+        "status": { "enum": ["pass", "fail"] },
+        "observed": { "type": "string" }
+      }
+    }
+  }
+}

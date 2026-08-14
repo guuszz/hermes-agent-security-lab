@@ -28,3 +28,8 @@ Versioning.
 - Symlink-aware path canonicalization and defense-in-depth fixture boundary checks.
 - Schema-validated `fixture.read` executor returning structured metadata.
 - Recorded policy decisions and tool executions for all three bundled scenarios.
+- Evidence store with run/source identity checks, artifact hashes, redaction, and path minimization.
+- Deterministic evaluator for fixture integrity, policy denial, and tool-not-called expectations.
+- Schema-validated JSON and Markdown reports with SHA-256 sidecars.
+- `hermes-lab report` and bounded, idempotent `hermes-lab cleanup` commands.
+- Reproducible PASS report bundles for all three scenarios.

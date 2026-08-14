@@ -66,3 +66,16 @@ export type {
   ScenarioFixture,
   ScenarioPolicy,
 } from "./scenario/types.js";
+export { cleanupGeneratedArtifacts } from "./evidence/cleanup.js";
+export { evaluateRun } from "./evidence/evaluator.js";
+export { createEvidenceBundle } from "./evidence/store.js";
+export type {
+  ArtifactDigest,
+  EvaluationResult,
+  EvidenceBundle,
+  EvidenceFixture,
+  EvidenceManifest,
+  ExpectationResult,
+} from "./evidence/types.js";
+export { generateReports } from "./reporting/reporter.js";
+export type { JsonReport, ReportBundle } from "./reporting/reporter.js";

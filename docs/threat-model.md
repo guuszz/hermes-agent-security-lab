@@ -26,12 +26,13 @@
 | Untrusted instructions request undeclared action | explicit deny and default-deny tool allowlist      |    M3 implemented |
 | Path escapes the fixture workspace               | lexical, real-path, symlink, and tool recheck      |    M3 implemented |
 | Credential enters a log                          | environment-only secret and bounded redaction      |    M1 implemented |
-| Model invents a passing result                   | deterministic evaluator                            |                M4 |
+| Model invents a passing result                   | code-only deterministic evaluator                  |    M4 implemented |
 | Infinite or expensive action sequence            | calls, tokens, remaining timeout, provider budget  | M1/M3 implemented |
 | Sensitive tool runs without approval             | per-tool simulated approval gate                   |    M3 implemented |
 | Existing config is overwritten                   | exclusive manifest creation and conflict rejection |                M0 |
 | CI consumes paid credit                          | no credentials and mocked transport                |             M0/M1 |
-| Scenario or fixture changes before a run         | source and fixture SHA-256 in prepared manifest    |    M2 implemented |
+| Scenario, fixture, or run artifact changes       | source, fixture, artifact, evidence/report hashes  | M2/M4 implemented |
+| Secret or workstation path enters a report       | redaction and path-minimized evidence              |    M4 implemented |
 | Credential forwarded to a substituted endpoint   | fixed official HTTPS endpoint                      |    M1 implemented |
 | Concurrent requests oversubscribe budget         | atomic worst-case reservation before fetch         |    M1 implemented |
 | Missing usage is treated as free                 | reject successful unmetered responses              |    M1 implemented |
@@ -61,3 +62,8 @@ M3 treats every declared action as denied until it passes the complete policy se
 explicit-deny precedence, undeclared tools, missing/denied approval, traversal, absolute paths,
 filesystem links, non-allowlisted paths, and call/token/timeout exhaustion. Allowed local reads are
 schema-validated and return metadata only. Expectations remain unevaluated until M4.
+
+M4 reopens and hashes the run inputs, verifies cross-file identity, minimizes paths, and applies
+redaction before evidence persistence. JSON Schemas reject unexpected output shapes. Checksum
+sidecars detect later evidence/report modification. Residual risk: local checksums are integrity
+signals, not signed attestations; release signing is an M5 concern.

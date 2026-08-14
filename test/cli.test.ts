@@ -71,6 +71,32 @@ void test("CLI completes the first local flow", async () => {
     assert.equal(prepared.policyRecord.state, "policy-evaluated");
     assert.equal(prepared.policyRecord.execution.modelCalls, 0);
     assert.equal(prepared.policyRecord.execution.deniedActions, 1);
+
+    const runDirectory = path.dirname(
+      (JSON.parse(run.stdout) as { policyRecordPath: string }).policyRecordPath,
+    );
+    const report = spawnSync(
+      process.execPath,
+      ["--import", "tsx", cli, "report", runDirectory, "--json"],
+      { encoding: "utf8" },
+    );
+    assert.equal(report.status, 0, report.stderr);
+    assert.equal(
+      (JSON.parse(report.stdout) as { report: { status: string } }).report
+        .status,
+      "pass",
+    );
+
+    const cleanup = spawnSync(
+      process.execPath,
+      ["--import", "tsx", cli, "cleanup", runDirectory, "--json"],
+      { encoding: "utf8" },
+    );
+    assert.equal(cleanup.status, 0, cleanup.stderr);
+    assert.equal(
+      (JSON.parse(cleanup.stdout) as { removed: string[] }).removed.length,
+      5,
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

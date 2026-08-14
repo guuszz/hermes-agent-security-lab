@@ -6,8 +6,8 @@
 A local, reproducible laboratory for evaluating tool-using AI agents with declarative
 scenarios, deny-by-default policies, traceable evidence, and deterministic outcomes.
 
-> Status: M3 policy engine. Deny-by-default decisions, approval gates, path boundaries, budgets,
-> and one schema-validated local tool are implemented. Provider use remains opt-in and capped.
+> Status: M4 evidence and reporting. Hashed evidence, deterministic evaluation, JSON/Markdown
+> reports, and idempotent cleanup are implemented. Provider use remains opt-in and capped.
 
 ## Why this exists
 
@@ -25,6 +25,8 @@ flowchart LR
     POLICY -->|allow| TOOL["Schema-validated fixture.read"]
     POLICY -->|deny| LOG["Recorded decision"]
     TOOL --> LOG
+    LOG --> EVAL["Deterministic evaluator"]
+    EVAL --> REPORT["Hashed JSON + Markdown reports"]
 ```
 
 The target architecture is documented in [docs/architecture.md](docs/architecture.md).
@@ -39,6 +41,7 @@ npm run build
 node dist/cli/index.js init . --name hermes-agent-security-lab
 node dist/cli/index.js validate scenarios/tool-misuse.yaml
 node dist/cli/index.js run scenarios/tool-misuse.yaml --workspace .
+node dist/cli/index.js report .hermes-lab/runs/<run-id>
 ```
 
 Expected output:
@@ -48,14 +51,18 @@ Valid scenario tool-misuse
 SHA-256: ...
 Evaluated local run ...-tool-misuse-...
 Allowed: 0; denied: 1
+Generated PASS report for tool-misuse
 ```
 
 The generated workspace starts with `defaultDeny: true`. `validate` rejects unknown fields and
 policy contradictions. `run` verifies fixture integrity, evaluates every declared action, executes
 only allowlisted local tools, and records `policy-decisions.json` under `.hermes-lab/runs/`.
+`report` verifies run identity, hashes its inputs, evaluates expectations, and writes `evidence.json`,
+`report.json`, and `report.md`. Repeating `report` produces the same report for unchanged evidence.
 
 Three versioned examples cover indirect instruction, tool misuse, and path traversal. See the
 [scenario authoring contract](docs/scenario-authoring.md) for the complete field reference.
+Reproducible report bundles for all three are under [examples/reports](examples/reports).
 
 ## Quality checks
 
@@ -131,7 +138,7 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 - **M1:** dedicated OrcaRouter provider, budget controls, mock tests, and controlled smoke harness.
 - **M2:** YAML scenario schema, loader, validator, and zero-execution runner. **Complete.**
 - **M3:** deny-by-default policy engine and blocking tests. **Complete.**
-- **M4:** evidence store, deterministic evaluator, JSON and Markdown reports.
+- **M4:** evidence store, deterministic evaluator, JSON and Markdown reports. **Complete.**
 - **M5:** demo assets, release candidate, and public launch material.
 
 ## Documentation
@@ -147,13 +154,16 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 - [M1 validation](docs/validation/m1-validation.md)
 - [M2 validation](docs/validation/m2-validation.md)
 - [M3 validation](docs/validation/m3-validation.md)
+- [Evidence and reports](docs/evidence-and-reports.md)
+- [ADR-0005](docs/adr/0005-evidence-and-deterministic-evaluation.md)
+- [M4 validation](docs/validation/m4-validation.md)
 - [Contributing](CONTRIBUTING.md)
 
 ## Limitations
 
-M3 evaluates declared policy actions and executes only `fixture.read`; it does not yet compare
-expectations into pass/fail findings. Durable evidence, deterministic evaluation, and reports arrive
-in M4. Provider state is per process. Included local flows make no external target requests.
+M4 evaluates the declared local expectations, but it does not yet orchestrate a live agent/model
+conversation. Provider state is per process; the controlled provider smoke remains separate from
+scenario reports. Included local flows make no external target requests.
 
 ## License
 
