@@ -7,9 +7,11 @@
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "release:check": "node scripts/validate-release.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "demo": "npm run build && node scripts/demo.mjs",
     "examples": "npm run build && node scripts/generate-example-reports.mjs",
     "smoke:orcarouter": "npm run build && node dist/smoke/orcarouter-smoke.js"
   },
@@ -51,6 +53,7 @@
     "fixtures",
     "examples",
     "docs",
+    "scripts",
     "README.md"
   ],
   "repository": {

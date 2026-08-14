@@ -5,3 +5,4 @@ package-lock.json
 docs/validation/m0-validation.txt
 examples/reports/**/evidence.json
 examples/reports/**/report.json
+examples/reports/**/report.md

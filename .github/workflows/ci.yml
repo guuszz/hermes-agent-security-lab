@@ -33,5 +33,9 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Run zero-network demo
+        run: npm run demo
+      - name: Validate release assets and links
+        run: npm run release:check
       - name: Verify package contents
         run: npm pack --dry-run

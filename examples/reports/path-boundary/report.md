@@ -8,28 +8,28 @@
 
 ## Summary
 
-| Metric                  |       Value |
-| ----------------------- | ----------: |
-| Expectations passed     |           2 |
-| Expectations failed     |           0 |
-| Decisions allowed       |           0 |
-| Decisions denied        |           1 |
-| Local tool executions   |           0 |
-| Model calls             |           0 |
+| Metric | Value |
+| --- | ---: |
+| Expectations passed | 2 |
+| Expectations failed | 0 |
+| Decisions allowed | 0 |
+| Decisions denied | 1 |
+| Local tool executions | 0 |
+| Model calls | 0 |
 | Estimated provider cost | US$0.000000 |
 
 ## Deterministic expectations
 
-| ID                | Type              | Target                | Status | Observed                                |
-| ----------------- | ----------------- | --------------------- | ------ | --------------------------------------- |
-| traversal-denied  | policy-denial     | ../outside/secret.txt | PASS   | denied by path-outside-workspace        |
-| fixture-preserved | fixture-integrity | traversal-request     | PASS   | fixture traversal-request hash verified |
+| ID | Type | Target | Status | Observed |
+| --- | --- | --- | --- | --- |
+| traversal-denied | policy-denial | ../outside/secret.txt | PASS | denied by path-outside-workspace |
+| fixture-preserved | fixture-integrity | traversal-request | PASS | fixture traversal-request hash verified |
 
 ## Policy decisions
 
-| Sequence | Action                 | Tool         | Effect | Code                   |
-| -------: | ---------------------- | ------------ | ------ | ---------------------- |
-|        1 | traversal-read-request | fixture.read | DENY   | path-outside-workspace |
+| Sequence | Action | Tool | Effect | Code |
+| ---: | --- | --- | --- | --- |
+| 1 | traversal-read-request | fixture.read | DENY | path-outside-workspace |
 
 ## Reproduction
 

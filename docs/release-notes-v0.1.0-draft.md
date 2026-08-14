@@ -1,4 +1,4 @@
-# Hermes Agent Security Lab v0.1.0 — draft
+# Hermes Agent Security Lab v0.1.0 — superseded draft
 
 This release is not ready yet. M0 establishes the TypeScript foundation, local workspace bootstrap,
 tests, CI, architecture, and threat model. M1 adds the bounded OrcaRouter/Hy3 provider and mock
@@ -6,7 +6,8 @@ validation; its real smoke still requires a host-provided key. M2 adds strict de
 three synthetic fixtures, and traceable zero-execution run preparation. M3 adds deny-by-default
 policy decisions, approval gates, path and budget enforcement, plus a schema-validated local
 fixture tool. M4 adds hashed evidence, deterministic expectation evaluation, reproducible reports,
-and cleanup. M5 release/demo work remains before the `v0.1.0` tag.
+and cleanup. M5 release/demo work is recorded in the final
+[v0.1.0 release notes](release-notes-v0.1.0.md).
 
 Planned release highlights:
 

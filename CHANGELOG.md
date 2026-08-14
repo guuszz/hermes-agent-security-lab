@@ -5,6 +5,8 @@ Versioning.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-13
+
 ### Added
 
 - Independent TypeScript repository and strict quality toolchain.
@@ -33,3 +35,5 @@ Versioning.
 - Schema-validated JSON and Markdown reports with SHA-256 sidecars.
 - `hermes-lab report` and bounded, idempotent `hermes-lab cleanup` commands.
 - Reproducible PASS report bundles for all three scenarios.
+- Isolated zero-network demo command and animated terminal preview.
+- Publication checklist, bilingual launch copy, final release notes, and verified release-candidate record.

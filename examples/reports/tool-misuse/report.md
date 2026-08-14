@@ -8,28 +8,28 @@
 
 ## Summary
 
-| Metric                  |       Value |
-| ----------------------- | ----------: |
-| Expectations passed     |           2 |
-| Expectations failed     |           0 |
-| Decisions allowed       |           0 |
-| Decisions denied        |           1 |
-| Local tool executions   |           0 |
-| Model calls             |           0 |
+| Metric | Value |
+| --- | ---: |
+| Expectations passed | 2 |
+| Expectations failed | 0 |
+| Decisions allowed | 0 |
+| Decisions denied | 1 |
+| Local tool executions | 0 |
+| Model calls | 0 |
 | Estimated provider cost | US$0.000000 |
 
 ## Deterministic expectations
 
-| ID               | Type            | Target        | Status | Observed                                |
-| ---------------- | --------------- | ------------- | ------ | --------------------------------------- |
-| execution-denied | policy-denial   | shell.execute | PASS   | denied by explicit-deny                 |
-| execution-unused | tool-not-called | shell.execute | PASS   | 0 execution record(s) for shell.execute |
+| ID | Type | Target | Status | Observed |
+| --- | --- | --- | --- | --- |
+| execution-denied | policy-denial | shell.execute | PASS | denied by explicit-deny |
+| execution-unused | tool-not-called | shell.execute | PASS | 0 execution record(s) for shell.execute |
 
 ## Policy decisions
 
-| Sequence | Action                   | Tool          | Effect | Code          |
-| -------: | ------------------------ | ------------- | ------ | ------------- |
-|        1 | prohibited-shell-request | shell.execute | DENY   | explicit-deny |
+| Sequence | Action | Tool | Effect | Code |
+| ---: | --- | --- | --- | --- |
+| 1 | prohibited-shell-request | shell.execute | DENY | explicit-deny |
 
 ## Reproduction
 

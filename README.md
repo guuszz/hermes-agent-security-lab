@@ -6,8 +6,14 @@
 A local, reproducible laboratory for evaluating tool-using AI agents with declarative
 scenarios, deny-by-default policies, traceable evidence, and deterministic outcomes.
 
-> Status: M4 evidence and reporting. Hashed evidence, deterministic evaluation, JSON/Markdown
-> reports, and idempotent cleanup are implemented. Provider use remains opt-in and capped.
+> Status: v0.1.0 release candidate. The complete local MVP is implemented and provider use
+> remains opt-in and capped.
+
+![Terminal demo: validate, run, block and report a synthetic tool-misuse scenario](docs/assets/hermes-lab-demo.gif)
+
+**Resumo em português:** laboratório local para testar agentes com ferramentas e acesso a arquivos.
+Os cenários são sintéticos, a política nega por padrão e o resultado é decidido por evidências
+determinísticas — não pelo modelo.
 
 ## Why this exists
 
@@ -37,6 +43,16 @@ Requirements: Node.js 20 or newer.
 
 ```bash
 npm ci
+npm run demo
+```
+
+The demo creates an isolated temporary workspace, validates and runs the bundled tool-misuse
+scenario, generates a deterministic report, prints the observed result, and removes the temporary
+workspace. It performs no model or network call.
+
+To inspect each CLI stage manually:
+
+```bash
 npm run build
 node dist/cli/index.js init . --name hermes-agent-security-lab
 node dist/cli/index.js validate scenarios/tool-misuse.yaml
@@ -139,7 +155,7 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 - **M2:** YAML scenario schema, loader, validator, and zero-execution runner. **Complete.**
 - **M3:** deny-by-default policy engine and blocking tests. **Complete.**
 - **M4:** evidence store, deterministic evaluator, JSON and Markdown reports. **Complete.**
-- **M5:** demo assets, release candidate, and public launch material.
+- **M5:** demo assets, release candidate, and public launch material. **Complete.**
 
 ## Documentation
 
@@ -157,11 +173,14 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 - [Evidence and reports](docs/evidence-and-reports.md)
 - [ADR-0005](docs/adr/0005-evidence-and-deterministic-evaluation.md)
 - [M4 validation](docs/validation/m4-validation.md)
+- [v0.1.0 release notes](docs/release-notes-v0.1.0.md)
+- [Release checklist](docs/publishing/release-checklist.md)
+- [LinkedIn launch copy](docs/publishing/linkedin-launch.md)
 - [Contributing](CONTRIBUTING.md)
 
 ## Limitations
 
-M4 evaluates the declared local expectations, but it does not yet orchestrate a live agent/model
+v0.1.0 evaluates the declared local expectations, but it does not yet orchestrate a live agent/model
 conversation. Provider state is per process; the controlled provider smoke remains separate from
 scenario reports. Included local flows make no external target requests.
 
