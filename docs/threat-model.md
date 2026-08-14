@@ -23,11 +23,12 @@
 
 | Threat                                           | Initial control                                    | Planned milestone |
 | ------------------------------------------------ | -------------------------------------------------- | ----------------: |
-| Untrusted instructions request undeclared action | deny-by-default manifest and future tool allowlist |                M3 |
-| Path escapes the fixture workspace               | lexical and real-path boundary before fixture read |    M2 implemented |
+| Untrusted instructions request undeclared action | explicit deny and default-deny tool allowlist      |    M3 implemented |
+| Path escapes the fixture workspace               | lexical, real-path, symlink, and tool recheck      |    M3 implemented |
 | Credential enters a log                          | environment-only secret and bounded redaction      |    M1 implemented |
 | Model invents a passing result                   | deterministic evaluator                            |                M4 |
-| Infinite or expensive loop                       | output, timeout, attempts, and budget limits       |    M1 implemented |
+| Infinite or expensive action sequence            | calls, tokens, remaining timeout, provider budget  | M1/M3 implemented |
+| Sensitive tool runs without approval             | per-tool simulated approval gate                   |    M3 implemented |
 | Existing config is overwritten                   | exclusive manifest creation and conflict rejection |                M0 |
 | CI consumes paid credit                          | no credentials and mocked transport                |             M0/M1 |
 | Scenario or fixture changes before a run         | source and fixture SHA-256 in prepared manifest    |    M2 implemented |
@@ -54,4 +55,9 @@ uses an injected mock transport.
 M2 treats YAML and fixture declarations as untrusted. Strict validation rejects additional fields,
 path traversal segments, malformed hashes, and contradictory tool rules. The runner resolves
 filesystem links before enforcing the fixture boundary and stops before creating a run when a hash
-differs. Declared expectations are recorded but not enforced until M3/M4.
+differs.
+
+M3 treats every declared action as denied until it passes the complete policy sequence. Tests cover
+explicit-deny precedence, undeclared tools, missing/denied approval, traversal, absolute paths,
+filesystem links, non-allowlisted paths, and call/token/timeout exhaustion. Allowed local reads are
+schema-validated and return metadata only. Expectations remain unevaluated until M4.

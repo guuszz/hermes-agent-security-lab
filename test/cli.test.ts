@@ -63,10 +63,14 @@ void test("CLI completes the first local flow", async () => {
     );
     assert.equal(run.status, 0, run.stderr);
     const prepared = JSON.parse(run.stdout) as {
-      manifest: { state: string; execution: { modelCalls: number } };
+      policyRecord: {
+        state: string;
+        execution: { modelCalls: number; deniedActions: number };
+      };
     };
-    assert.equal(prepared.manifest.state, "prepared");
-    assert.equal(prepared.manifest.execution.modelCalls, 0);
+    assert.equal(prepared.policyRecord.state, "policy-evaluated");
+    assert.equal(prepared.policyRecord.execution.modelCalls, 0);
+    assert.equal(prepared.policyRecord.execution.deniedActions, 1);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -29,18 +29,39 @@ export type {
   TokenUsage,
 } from "./providers/types.js";
 export { ScenarioValidationError, loadScenario } from "./scenario/loader.js";
-export { prepareScenarioRun } from "./scenario/runner.js";
+export {
+  executeScenarioPolicyRun,
+  prepareScenarioRun,
+} from "./scenario/runner.js";
 export type {
   PreparedRun,
   PreparedRunManifest,
+  PolicyRun,
+  PolicyRunRecord,
   RunnerDependencies,
   VerifiedFixture,
 } from "./scenario/runner.js";
+export { PolicyEngine } from "./policy/engine.js";
+export { executeLocalTool } from "./policy/local-tools.js";
+export type {
+  StructuredToolResult,
+  LocalToolExecutionRecord,
+  ToolExecutionFailureRecord,
+  ToolExecutionRecord,
+} from "./policy/local-tools.js";
+export type {
+  PolicyAction,
+  PolicyDecision,
+  PolicyDecisionCode,
+  PolicyEngineOptions,
+  PolicyUsage,
+} from "./policy/types.js";
 export type {
   ExpectationType,
   LoadedScenario,
   RiskCategory,
   Scenario,
+  ScenarioAction,
   ScenarioExpectation,
   ScenarioFixture,
   ScenarioPolicy,

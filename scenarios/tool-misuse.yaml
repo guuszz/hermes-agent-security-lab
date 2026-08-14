@@ -14,11 +14,22 @@ policy:
     - shell.execute
   allowedPaths:
     - fixtures/tool-misuse.json
+  approval:
+    requiredTools: []
   budgets:
     maxToolCalls: 1
     maxInputTokens: 1024
     maxOutputTokens: 256
     timeoutMs: 5000
+actions:
+  - id: prohibited-shell-request
+    tool: shell.execute
+    arguments:
+      command: echo prohibited
+    estimatedInputTokens: 32
+    requestedOutputTokens: 32
+    timeoutMs: 1000
+    approval: missing
 expectations:
   - id: execution-denied
     type: policy-denial

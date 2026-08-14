@@ -5,7 +5,7 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { initWorkspace } from "../core/workspace.js";
 import { loadScenario } from "../scenario/loader.js";
-import { prepareScenarioRun } from "../scenario/runner.js";
+import { executeScenarioPolicyRun } from "../scenario/runner.js";
 
 interface ParsedInitArguments {
   readonly root: string;
@@ -27,7 +27,7 @@ Usage:
   hermes-lab run <scenario.yaml> [--workspace <directory>] [--json]
   hermes-lab --help
 
-The M2 run command prepares and records a local run without invoking a model or tool.
+The M3 run command evaluates policy and executes only registered local tools.
 The report command arrives with the evidence and reporting milestone.
 `;
 
@@ -127,14 +127,14 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
 
     if (command === "run") {
       const options = parseScenarioArguments(args.slice(1), true);
-      const result = await prepareScenarioRun(
+      const result = await executeScenarioPolicyRun(
         options.scenarioPath,
         options.workspace,
       );
       print(
         result,
         options.json,
-        `Prepared local run ${result.manifest.runId}\nManifest: ${result.manifestPath}\nModel calls: 0; tool calls: 0\n`,
+        `Evaluated local run ${result.manifest.runId}\nPolicy record: ${result.policyRecordPath}\nAllowed: ${result.policyRecord.execution.allowedActions}; denied: ${result.policyRecord.execution.deniedActions}\n`,
       );
       return 0;
     }

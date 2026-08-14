@@ -6,8 +6,8 @@
 A local, reproducible laboratory for evaluating tool-using AI agents with declarative
 scenarios, deny-by-default policies, traceable evidence, and deterministic outcomes.
 
-> Status: M2 scenario engine. Strict YAML validation, fixture integrity checks, and zero-execution
-> run preparation are implemented. The real provider smoke test remains opt-in and budget-capped.
+> Status: M3 policy engine. Deny-by-default decisions, approval gates, path boundaries, budgets,
+> and one schema-validated local tool are implemented. Provider use remains opt-in and capped.
 
 ## Why this exists
 
@@ -21,8 +21,10 @@ The model may explain an outcome, but deterministic evaluators decide whether a 
 flowchart LR
     YAML["Scenario YAML"] --> VALIDATE["Strict JSON Schema + semantic checks"]
     VALIDATE --> HASH["Fixture path and SHA-256 verification"]
-    HASH --> PREPARE["Zero-execution run preparation"]
-    PREPARE --> MANIFEST["Traceable run manifest"]
+    HASH --> POLICY["Deny-by-default policy engine"]
+    POLICY -->|allow| TOOL["Schema-validated fixture.read"]
+    POLICY -->|deny| LOG["Recorded decision"]
+    TOOL --> LOG
 ```
 
 The target architecture is documented in [docs/architecture.md](docs/architecture.md).
@@ -44,13 +46,13 @@ Expected output:
 ```text
 Valid scenario tool-misuse
 SHA-256: ...
-Prepared local run ...-tool-misuse-...
-Model calls: 0; tool calls: 0
+Evaluated local run ...-tool-misuse-...
+Allowed: 0; denied: 1
 ```
 
 The generated workspace starts with `defaultDeny: true`. `validate` rejects unknown fields and
-policy contradictions. `run` verifies local fixture boundaries and hashes, then writes a prepared
-manifest under `.hermes-lab/runs/`; it does not invoke a model or tool in M2.
+policy contradictions. `run` verifies fixture integrity, evaluates every declared action, executes
+only allowlisted local tools, and records `policy-decisions.json` under `.hermes-lab/runs/`.
 
 Three versioned examples cover indirect instruction, tool misuse, and path traversal. See the
 [scenario authoring contract](docs/scenario-authoring.md) for the complete field reference.
@@ -114,8 +116,9 @@ key in a host-provided environment secret rather than a committed file.
 ## Security model
 
 - local and synthetic fixtures by default;
-- deny-by-default policy foundation;
-- no arbitrary shell execution;
+- deny-by-default policy with explicit-deny precedence;
+- only the schema-validated `fixture.read` local tool is registered;
+- simulated approval gates and bounded calls, tokens, paths, and time;
 - secrets only through environment variables;
 - deterministic pass/fail evaluation;
 - bounded tools, paths, time, calls, and tokens in the MVP contract.
@@ -127,7 +130,7 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 - **M0:** repository foundation, CLI bootstrap, tests, CI, ADR, and architecture.
 - **M1:** dedicated OrcaRouter provider, budget controls, mock tests, and controlled smoke harness.
 - **M2:** YAML scenario schema, loader, validator, and zero-execution runner. **Complete.**
-- **M3:** deny-by-default policy engine and blocking tests.
+- **M3:** deny-by-default policy engine and blocking tests. **Complete.**
 - **M4:** evidence store, deterministic evaluator, JSON and Markdown reports.
 - **M5:** demo assets, release candidate, and public launch material.
 
@@ -140,15 +143,17 @@ See [docs/threat-model.md](docs/threat-model.md) and [SECURITY.md](SECURITY.md).
 - [ADR-0001](docs/adr/0001-foundation-and-trust-boundaries.md)
 - [ADR-0002](docs/adr/0002-orcarouter-provider-and-budget.md)
 - [ADR-0003](docs/adr/0003-scenario-validation-and-prepared-runs.md)
+- [ADR-0004](docs/adr/0004-policy-decisions-and-local-tool-boundary.md)
 - [M1 validation](docs/validation/m1-validation.md)
 - [M2 validation](docs/validation/m2-validation.md)
+- [M3 validation](docs/validation/m3-validation.md)
 - [Contributing](CONTRIBUTING.md)
 
 ## Limitations
 
-The M2 runner prepares a run but does not dispatch tools or evaluate expectations. Policy
-enforcement arrives in M3; durable evidence, findings, and reports arrive in M4. Provider state is
-per process. No external target is contacted by the included local flows.
+M3 evaluates declared policy actions and executes only `fixture.read`; it does not yet compare
+expectations into pass/fail findings. Durable evidence, deterministic evaluation, and reports arrive
+in M4. Provider state is per process. Included local flows make no external target requests.
 
 ## License
 

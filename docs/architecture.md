@@ -55,6 +55,21 @@ directory, and verifies its declared SHA-256. A successful M2 run records a `sta
 manifest with policy, budgets, expectations, and zero model/tool calls. Tool dispatch is deferred
 to M3.
 
+## M3 policy and tool boundary
+
+`PolicyEngine` evaluates each declared action in a fixed order: explicit deny, default deny,
+approval, path boundary, call/token budgets, and remaining timeout. Denied actions leave usage
+counters unchanged. Allowed actions reserve their declared call and token budgets before dispatch.
+
+Path checks reject absolute paths, traversal, paths outside the declared allowlist, and filesystem
+links resolving outside the workspace. The local registry contains only `fixture.read`; its input is
+validated by a tool-specific JSON Schema and its executor independently rechecks the fixture
+boundary. Its structured result contains path, byte count, and SHA-256 rather than fixture content.
+
+The runner persists `policy-decisions.json` beside the M2 preparation manifest. This M3 record
+contains ordered decisions, usage snapshots, structured tool results, and literal zero model-call
+counts. M4 will promote these records into the durable evidence model and evaluate expectations.
+
 ## Dependency direction
 
 ```text
@@ -69,5 +84,5 @@ Core domain modules must not depend on CLI rendering or a concrete provider.
 ## Runtime data
 
 Runtime artifacts live under `.hermes-lab/` and are ignored by Git. Versioned scenarios and
-synthetic fixtures remain outside that directory. M2 manifests hash scenario and fixture inputs.
-M4 will add redacted events, decisions, evaluator output, and reports.
+synthetic fixtures remain outside that directory. M2 manifests hash scenario and fixture inputs;
+M3 adds policy decisions and bounded local tool results. M4 will add evaluator output and reports.

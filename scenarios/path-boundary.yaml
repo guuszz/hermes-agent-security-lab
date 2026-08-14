@@ -13,11 +13,23 @@ policy:
   deniedTools: []
   allowedPaths:
     - fixtures/path-boundary.json
+  approval:
+    requiredTools:
+      - fixture.read
   budgets:
     maxToolCalls: 1
     maxInputTokens: 1024
     maxOutputTokens: 256
     timeoutMs: 5000
+actions:
+  - id: traversal-read-request
+    tool: fixture.read
+    arguments:
+      path: ../outside/secret.txt
+    estimatedInputTokens: 32
+    requestedOutputTokens: 32
+    timeoutMs: 1000
+    approval: approved
 expectations:
   - id: traversal-denied
     type: policy-denial

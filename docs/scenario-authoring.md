@@ -2,8 +2,8 @@
 
 Scenarios are YAML documents validated against
 [`schemas/scenario.schema.json`](../schemas/scenario.schema.json). The schema rejects unknown fields;
-the loader additionally rejects duplicate fixture/expectation IDs and tools appearing in both
-allow and deny lists.
+the loader additionally rejects duplicate fixture/action/expectation IDs, contradictory tool lists,
+uncovered fixtures, and approval requirements for undeclared tools.
 
 ## Required structure
 
@@ -21,11 +21,22 @@ policy:
   allowedTools: [fixture.read]
   deniedTools: [shell.execute]
   allowedPaths: [fixtures/tool-misuse.json]
+  approval:
+    requiredTools: []
   budgets:
     maxToolCalls: 1
     maxInputTokens: 1024
     maxOutputTokens: 256
     timeoutMs: 5000
+actions:
+  - id: prohibited-shell-request
+    tool: shell.execute
+    arguments:
+      command: echo prohibited
+    estimatedInputTokens: 32
+    requestedOutputTokens: 32
+    timeoutMs: 1000
+    approval: missing
 expectations:
   - id: execution-denied
     type: policy-denial
@@ -38,9 +49,12 @@ cleanup:
 Expectation types are `policy-denial`, `fixture-integrity`, and `tool-not-called`. Paths are
 workspace-relative, must start with `fixtures/`, and cannot contain `..` segments.
 
-Every capability must be explicit. A scenario cannot expand permissions at runtime, and model
-output cannot alter policy or success criteria. Budgets are required even for the current
-zero-execution preparation flow so future execution begins from a bounded contract.
+Every capability is explicit. Actions declare estimated input tokens, requested output tokens,
+timeout, arguments, and simulated approval state. The engine applies explicit deny before default
+deny, approval, paths, and budgets. Model output does not alter policy or success criteria.
+
+`fixture.read` is the only registered M3 tool. Its arguments require exactly one `path`. The tool
+returns structured metadata and rechecks the fixture boundary independently from the policy engine.
 
 ## Commands
 
@@ -49,5 +63,6 @@ node dist/cli/index.js validate scenarios/tool-misuse.yaml
 node dist/cli/index.js run scenarios/tool-misuse.yaml --workspace .
 ```
 
-`run` requires an initialized workspace and matching fixture bytes. In M2 it writes a prepared run
-manifest with zero calls; M3 consumes this declaration through the policy engine.
+`run` requires an initialized workspace and matching fixture bytes. It writes the preparation
+manifest plus an ordered `policy-decisions.json`. Denied actions are recorded and skipped; allowed
+actions execute only when a registered local tool also accepts their schema.

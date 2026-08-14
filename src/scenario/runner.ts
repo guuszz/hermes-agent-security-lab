@@ -5,6 +5,12 @@ import {
   WORKSPACE_DIRECTORY,
   type WorkspaceManifest,
 } from "../core/workspace.js";
+import { PolicyEngine } from "../policy/engine.js";
+import {
+  executeLocalTool,
+  type LocalToolExecutionRecord,
+} from "../policy/local-tools.js";
+import type { PolicyDecision, PolicyUsage } from "../policy/types.js";
 import { loadScenario } from "./loader.js";
 import type { LoadedScenario, ScenarioExpectation } from "./types.js";
 
@@ -34,6 +40,7 @@ export interface PreparedRunManifest {
     readonly allowedTools: readonly string[];
     readonly deniedTools: readonly string[];
     readonly allowedPaths: readonly string[];
+    readonly approval: { readonly requiredTools: readonly string[] };
     readonly budgets: {
       readonly maxToolCalls: number;
       readonly maxInputTokens: number;
@@ -49,6 +56,30 @@ export interface PreparedRunManifest {
 export interface PreparedRun {
   readonly manifestPath: string;
   readonly manifest: PreparedRunManifest;
+}
+
+export interface PolicyRunRecord {
+  readonly schemaVersion: 1;
+  readonly runId: string;
+  readonly scenarioSourceSha256: string;
+  readonly state: "policy-evaluated";
+  readonly decisions: readonly PolicyDecision[];
+  readonly toolExecutions: readonly LocalToolExecutionRecord[];
+  readonly usage: PolicyUsage;
+  readonly execution: {
+    readonly attemptedActions: number;
+    readonly allowedActions: number;
+    readonly deniedActions: number;
+    readonly modelCalls: 0;
+    readonly toolCalls: number;
+  };
+}
+
+export interface PolicyRun {
+  readonly manifestPath: string;
+  readonly policyRecordPath: string;
+  readonly manifest: PreparedRunManifest;
+  readonly policyRecord: PolicyRunRecord;
 }
 
 export interface RunnerDependencies {
@@ -119,7 +150,7 @@ function buildRunId(
   const timestamp = createdAt
     .toISOString()
     .replace(/[-:.TZ]/g, "")
-    .slice(0, 14);
+    .slice(0, 17);
   return `${timestamp}-${scenarioId}-${sourceSha256.slice(0, 12)}`;
 }
 
@@ -129,8 +160,16 @@ export async function prepareScenarioRun(
   dependencies: RunnerDependencies = {},
 ): Promise<PreparedRun> {
   const workspaceRoot = path.resolve(requestedWorkspaceRoot);
-  const workspace = await readWorkspaceManifest(workspaceRoot);
   const loaded = await loadScenario(scenarioPath);
+  return prepareLoadedScenarioRun(loaded, workspaceRoot, dependencies);
+}
+
+async function prepareLoadedScenarioRun(
+  loaded: LoadedScenario,
+  workspaceRoot: string,
+  dependencies: RunnerDependencies,
+): Promise<PreparedRun> {
+  const workspace = await readWorkspaceManifest(workspaceRoot);
   const fixtures = await verifyFixtures(loaded, workspaceRoot);
   const createdAt = (dependencies.now ?? (() => new Date()))();
   const runId = buildRunId(createdAt, loaded.scenario.id, loaded.sourceSha256);
@@ -158,6 +197,7 @@ export async function prepareScenarioRun(
       allowedTools: loaded.scenario.policy.allowedTools,
       deniedTools: loaded.scenario.policy.deniedTools,
       allowedPaths: loaded.scenario.policy.allowedPaths,
+      approval: loaded.scenario.policy.approval,
       budgets: loaded.scenario.policy.budgets,
     },
     fixtures,
@@ -170,4 +210,90 @@ export async function prepareScenarioRun(
     flag: "wx",
   });
   return { manifestPath, manifest };
+}
+
+export async function executeScenarioPolicyRun(
+  scenarioPath: string,
+  requestedWorkspaceRoot: string,
+  dependencies: RunnerDependencies = {},
+): Promise<PolicyRun> {
+  const workspaceRoot = path.resolve(requestedWorkspaceRoot);
+  const loaded = await loadScenario(scenarioPath);
+  const prepared = await prepareLoadedScenarioRun(
+    loaded,
+    workspaceRoot,
+    dependencies,
+  );
+  const engine = new PolicyEngine({
+    workspaceRoot,
+    policy: loaded.scenario.policy,
+    ...(dependencies.now
+      ? { now: () => dependencies.now?.().getTime() ?? Date.now() }
+      : {}),
+  });
+  const decisions: PolicyDecision[] = [];
+  const toolExecutions: LocalToolExecutionRecord[] = [];
+
+  for (const action of loaded.scenario.actions) {
+    const decision = await engine.evaluate(action);
+    decisions.push(decision);
+    if (decision.effect === "allow") {
+      const startedAt = Date.now();
+      try {
+        toolExecutions.push(
+          await executeLocalTool(
+            action,
+            workspaceRoot,
+            dependencies.now
+              ? () => dependencies.now?.().getTime() ?? Date.now()
+              : undefined,
+          ),
+        );
+      } catch (error) {
+        toolExecutions.push({
+          actionId: action.id,
+          tool: action.tool,
+          status: "failed",
+          durationMs: Math.max(0, Date.now() - startedAt),
+          error: (error instanceof Error ? error.message : String(error)).slice(
+            0,
+            500,
+          ),
+        });
+      }
+    }
+  }
+
+  const policyRecord: PolicyRunRecord = {
+    schemaVersion: 1,
+    runId: prepared.manifest.runId,
+    scenarioSourceSha256: prepared.manifest.scenario.sourceSha256,
+    state: "policy-evaluated",
+    decisions,
+    toolExecutions,
+    usage: engine.usage(),
+    execution: {
+      attemptedActions: decisions.length,
+      allowedActions: decisions.filter((item) => item.effect === "allow")
+        .length,
+      deniedActions: decisions.filter((item) => item.effect === "deny").length,
+      modelCalls: 0,
+      toolCalls: toolExecutions.length,
+    },
+  };
+  const policyRecordPath = path.join(
+    path.dirname(prepared.manifestPath),
+    "policy-decisions.json",
+  );
+  await writeFile(
+    policyRecordPath,
+    `${JSON.stringify(policyRecord, null, 2)}\n`,
+    { encoding: "utf8", flag: "wx" },
+  );
+  return {
+    manifestPath: prepared.manifestPath,
+    policyRecordPath,
+    manifest: prepared.manifest,
+    policyRecord,
+  };
 }

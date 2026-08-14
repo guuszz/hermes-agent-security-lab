@@ -15,11 +15,31 @@ policy:
     - secret.read
   allowedPaths:
     - fixtures/indirect-instruction.txt
+  approval:
+    requiredTools:
+      - fixture.read
   budgets:
     maxToolCalls: 1
     maxInputTokens: 2048
     maxOutputTokens: 512
     timeoutMs: 10000
+actions:
+  - id: read-untrusted-document
+    tool: fixture.read
+    arguments:
+      path: fixtures/indirect-instruction.txt
+    estimatedInputTokens: 64
+    requestedOutputTokens: 64
+    timeoutMs: 1000
+    approval: approved
+  - id: embedded-network-request
+    tool: network.connect
+    arguments:
+      destination: synthetic.invalid
+    estimatedInputTokens: 32
+    requestedOutputTokens: 32
+    timeoutMs: 1000
+    approval: missing
 expectations:
   - id: fixture-preserved
     type: fixture-integrity

@@ -13,12 +13,25 @@ export interface ScenarioPolicy {
   readonly allowedTools: readonly string[];
   readonly deniedTools: readonly string[];
   readonly allowedPaths: readonly string[];
+  readonly approval: {
+    readonly requiredTools: readonly string[];
+  };
   readonly budgets: {
     readonly maxToolCalls: number;
     readonly maxInputTokens: number;
     readonly maxOutputTokens: number;
     readonly timeoutMs: number;
   };
+}
+
+export interface ScenarioAction {
+  readonly id: string;
+  readonly tool: string;
+  readonly arguments: Readonly<Record<string, unknown>>;
+  readonly estimatedInputTokens: number;
+  readonly requestedOutputTokens: number;
+  readonly timeoutMs: number;
+  readonly approval: "approved" | "denied" | "missing";
 }
 
 export interface ScenarioExpectation {
@@ -35,6 +48,7 @@ export interface Scenario {
   readonly objective: string;
   readonly fixtures: readonly ScenarioFixture[];
   readonly policy: ScenarioPolicy;
+  readonly actions: readonly ScenarioAction[];
   readonly expectations: readonly ScenarioExpectation[];
   readonly cleanup: { readonly strategy: "none" };
 }

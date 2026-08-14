@@ -23,3 +23,8 @@ Versioning.
 - Fixture real-path boundaries and SHA-256 integrity verification.
 - `hermes-lab validate` and zero-execution `hermes-lab run` commands.
 - Prepared run manifests with source hashes, policy, budgets, expectations, and call counts.
+- Deny-by-default policy engine with explicit-deny precedence and ordered decision codes.
+- Simulated per-tool approval gate and bounded call, token, path, and timeout enforcement.
+- Symlink-aware path canonicalization and defense-in-depth fixture boundary checks.
+- Schema-validated `fixture.read` executor returning structured metadata.
+- Recorded policy decisions and tool executions for all three bundled scenarios.

@@ -31,10 +31,13 @@ function semanticIssues(scenario: Scenario): string[] {
   const expectationIds = scenario.expectations.map(
     (expectation) => expectation.id,
   );
+  const actionIds = scenario.actions.map((action) => action.id);
   if (new Set(fixtureIds).size !== fixtureIds.length)
     issues.push("fixture IDs must be unique");
   if (new Set(expectationIds).size !== expectationIds.length)
     issues.push("expectation IDs must be unique");
+  if (new Set(actionIds).size !== actionIds.length)
+    issues.push("action IDs must be unique");
 
   const denied = new Set(scenario.policy.deniedTools);
   const overlap = scenario.policy.allowedTools.filter((tool) =>
@@ -43,6 +46,15 @@ function semanticIssues(scenario: Scenario): string[] {
   if (overlap.length)
     issues.push(
       `tools cannot be both allowed and denied: ${overlap.join(", ")}`,
+    );
+
+  const allowed = new Set(scenario.policy.allowedTools);
+  const invalidApprovalTools = scenario.policy.approval.requiredTools.filter(
+    (tool) => !allowed.has(tool),
+  );
+  if (invalidApprovalTools.length)
+    issues.push(
+      `approval can only be required for allowed tools: ${invalidApprovalTools.join(", ")}`,
     );
 
   const uncoveredFixtures = scenario.fixtures

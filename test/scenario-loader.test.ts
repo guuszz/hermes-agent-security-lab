@@ -82,3 +82,25 @@ void test("rejects traversal and fixtures outside the declared path policy", asy
     await rm(root, { recursive: true, force: true });
   }
 });
+
+void test("rejects approval requirements for tools outside the allowlist", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "hermes-approval-schema-"));
+  try {
+    const source = await readFile("scenarios/tool-misuse.yaml", "utf8");
+    const scenarioPath = path.join(root, "invalid-approval.yaml");
+    await writeFile(
+      scenarioPath,
+      source.replace(
+        "    requiredTools: []",
+        "    requiredTools: [network.connect]",
+      ),
+      "utf8",
+    );
+    await assert.rejects(
+      loadScenario(scenarioPath),
+      /approval can only be required for allowed tools: network.connect/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
