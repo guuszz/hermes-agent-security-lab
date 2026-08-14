@@ -14,11 +14,11 @@
 
 ## Actions requiring the repository host
 
-- [ ] Create the public GitHub repository with the expected URL.
-- [ ] Push the release-candidate branch.
-- [ ] Confirm GitHub Actions passes on the hosted runner.
-- [ ] Review the README animation on desktop and mobile.
-- [ ] Merge through a reviewed pull request.
+- [x] Create the public GitHub repository with the expected URL.
+- [x] Push the release-candidate branch.
+- [x] Confirm GitHub Actions passes on the hosted runner.
+- [x] Review the README animation on desktop and mobile.
+- [x] Promote the CI-approved commit to the default `main` branch (the repository had no prior base for a meaningful pull request).
 - [ ] Create signed/annotated `v0.1.0` tag from the verified commit.
 - [ ] Publish the GitHub release using `docs/release-notes-v0.1.0.md`.
 - [ ] Add repository topics: `agentic-ai`, `ai-security`, `red-team`, `owasp`, `typescript`.

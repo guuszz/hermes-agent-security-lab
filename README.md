@@ -2,12 +2,14 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org/)
+[![CI](https://github.com/guuszz/hermes-agent-security-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/guuszz/hermes-agent-security-lab/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/guuszz/hermes-agent-security-lab)](https://github.com/guuszz/hermes-agent-security-lab/releases/latest)
 
 A local, reproducible laboratory for evaluating tool-using AI agents with declarative
 scenarios, deny-by-default policies, traceable evidence, and deterministic outcomes.
 
-> Status: v0.1.0 release candidate. The complete local MVP is implemented and provider use
-> remains opt-in and capped.
+> Status: v0.1.0. The complete local MVP is implemented and provider use remains opt-in and
+> capped.
 
 ![Terminal demo: validate, run, block and report a synthetic tool-misuse scenario](docs/assets/hermes-lab-demo.gif)
 

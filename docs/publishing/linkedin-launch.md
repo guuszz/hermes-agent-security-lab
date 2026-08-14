@@ -1,7 +1,7 @@
 # LinkedIn launch material
 
-Use only after the public GitHub release URL is available. Replace `RELEASE_URL` and
-`REPOSITORY_URL`; do not change the verified metrics without rerunning validation.
+The public release URL is included below. Do not change the verified metrics without rerunning
+validation.
 
 ## Portuguese launch post
 
@@ -24,7 +24,7 @@ Na primeira release:
 Uma decisão importante: o modelo pode explicar o resultado, mas não decide sozinho se o teste
 passou. O evaluator usa expectativas objetivas e evidências verificáveis.
 
-Código e release: RELEASE_URL
+Código e release: https://github.com/guuszz/hermes-agent-security-lab/releases/tag/v0.1.0
 
 Limitação atual: o MVP ainda não orquestra uma conversa completa com um agente ao executar os
 cenários. Esse é um dos próximos passos, junto com cenários MCP e exportação SARIF.
@@ -40,7 +40,7 @@ The v0.1.0 release includes three synthetic scenarios, 42 automated tests, zero-
 OpenAI-compatible provider adapter, and a fully local demo. Models may explain outcomes, but
 objective evaluators decide pass or fail.
 
-Release: RELEASE_URL
+Release: https://github.com/guuszz/hermes-agent-security-lab/releases/tag/v0.1.0
 
 Current limitation: scenario runs do not yet orchestrate a complete live-agent conversation.
 
